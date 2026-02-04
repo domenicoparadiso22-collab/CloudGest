@@ -1,229 +1,246 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>WebApp</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style>
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-    </style>
-</head>
-<body x-data="appLogic()" class="bg-gray-100 text-gray-800 font-sans h-screen flex flex-col overflow-hidden">
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
+            {{ __('Panoramica') }}
+        </h2>
+    </x-slot>
 
-    <div class="bg-white shadow-sm z-30 px-4 py-3 flex justify-between items-center shrink-0 relative">
-        <div>
-            <h1 class="font-bold text-lg leading-none">{{ explode(' ', $employee->name)[0] }}</h1>
-            <div class="flex items-center gap-1">
-                <span class="w-2 h-2 rounded-full {{ $status == 'exit' ? 'bg-green-500 animate-pulse' : 'bg-gray-400' }}"></span>
-                <p class="text-xs text-gray-500">{{ $status == 'exit' ? 'In Servizio' : 'Fuori Servizio' }}</p>
-            </div>
-        </div>
-        <form action="{{ route('webapp.logout') }}" method="POST">
-            @csrf
-            <button class="bg-gray-50 p-2 rounded-full text-gray-500 hover:bg-gray-100">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-            </button>
-        </form>
-    </div>
-
-    <div class="flex-grow overflow-y-auto no-scrollbar relative flex flex-col z-0 pb-24"> 
-        
-        @if(session('success'))
-            <div class="fixed top-16 left-0 w-full px-4 z-50 pointer-events-none">
-                <div class="bg-green-500 text-white text-center py-2 rounded-lg shadow-lg text-sm font-bold" 
-                     x-init="setTimeout(() => show = false, 3000)" x-data="{show: true}" x-show="show">
-                    {{ session('success') }}
-                </div>
-            </div>
-        @endif
-        @if($errors->any())
-             <div class="fixed top-16 left-0 w-full px-4 z-50 pointer-events-none">
-                <div class="bg-red-500 text-white text-center py-2 rounded-lg shadow-lg text-sm font-bold">
-                    {{ $errors->first() }}
-                </div>
-            </div>
-        @endif
-
-        <div x-show="tab === 'home'" class="flex-grow flex flex-col">
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
-            @if($status === 'enter')
-                <div class="flex-grow flex flex-col items-center justify-center space-y-8 p-4">
-                    
-                    @if($notices->count() > 0)
-                        <div class="w-full max-w-sm space-y-2 opacity-80">
-                            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest text-center mb-2">Bacheca Recente</p>
-                            @foreach($notices->take(2) as $notice)
-                                <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 {{ $notice->is_urgent ? 'border-red-500' : 'border-indigo-500' }}">
-                                    @if($notice->message)<p class="text-sm truncate">{{ $notice->message }}</p>@endif
-                                    @if(!$notice->message)<p class="text-sm italic text-gray-400">Nuova comunicazione</p>@endif
+            <div class="flex flex-wrap gap-4 mb-8">
+                <a href="{{ route('work-reports.create') }}" class="flex items-center gap-2 bg-gray-800 text-white px-5 py-3 rounded-lg shadow hover:bg-gray-700 transition transform hover:scale-105">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Nuovo Rapporto
+                </a>
+                <a href="{{ route('quotes.create') }}" class="flex items-center gap-2 bg-white text-gray-700 border border-gray-300 px-5 py-3 rounded-lg shadow-sm hover:bg-gray-50 transition transform hover:scale-105">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Nuovo Preventivo
+                </a>
+                <a href="{{ route('invoices.create') }}" class="flex items-center gap-2 bg-white text-gray-700 border border-gray-300 px-5 py-3 rounded-lg shadow-sm hover:bg-gray-50 transition transform hover:scale-105">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Emetti Fattura
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                
+                <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white relative overflow-hidden">
+                    <div class="absolute right-0 top-0 opacity-20 transform translate-x-2 -translate-y-2">
+                        <svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h3 class="text-sm font-medium uppercase tracking-wider opacity-90">Da Incassare</h3>
+                    <p class="text-3xl font-bold mt-1">€ {{ number_format($unpaidAmount, 2, ',', '.') }}</p>
+                    <div class="mt-4 text-xs bg-white bg-opacity-20 inline-block px-2 py-1 rounded">Attenzione ai ritardi</div>
+                </div>
+
+                <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl shadow-lg p-6 text-white relative overflow-hidden">
+                    <div class="absolute right-0 top-0 opacity-20 transform translate-x-2 -translate-y-2">
+                        <svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                    </div>
+                    <h3 class="text-sm font-medium uppercase tracking-wider opacity-90">Rapporti (Mese)</h3>
+                    <p class="text-3xl font-bold mt-1">{{ $reportsThisMonth }}</p>
+                    <div class="mt-4 text-xs bg-white bg-opacity-20 inline-block px-2 py-1 rounded">Interventi effettuati</div>
+                </div>
+
+                <div class="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl shadow-lg p-6 text-white relative overflow-hidden">
+                    <div class="absolute right-0 top-0 opacity-20 transform translate-x-2 -translate-y-2">
+                        <svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    </div>
+                    <h3 class="text-sm font-medium uppercase tracking-wider opacity-90">Preventivi Aperti</h3>
+                    <p class="text-3xl font-bold mt-1">{{ $quotesPending }}</p>
+                    <div class="mt-4 text-xs bg-white bg-opacity-20 inline-block px-2 py-1 rounded">In attesa risposta</div>
+                </div>
+
+                <div class="bg-gradient-to-br from-green-500 to-teal-500 rounded-xl shadow-lg p-6 text-white relative overflow-hidden">
+                    <div class="absolute right-0 top-0 opacity-20 transform translate-x-2 -translate-y-2">
+                        <svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                    <h3 class="text-sm font-medium uppercase tracking-wider opacity-90">Clienti Totali</h3>
+                    <p class="text-3xl font-bold mt-1">{{ $clientsCount }}</p>
+                    <div class="mt-4 text-xs bg-white bg-opacity-20 inline-block px-2 py-1 rounded">Anagrafica attiva</div>
+                </div>
+            </div>
+
+            <div class="bg-white overflow-hidden shadow-lg rounded-xl mb-8">
+                <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        Panoramica Dipendenti
+                    </h3>
+                    <a href="{{ route('employees.index') }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 uppercase tracking-wide">Gestisci Personale &rarr;</a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-100">
+                        <thead>
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase bg-white">Dipendente</th>
+                                <th class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase bg-white">Stato Odierno</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase bg-white">Ultima Attività</th>
+                                <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase bg-white">Prossime Ferie/Assenze</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 bg-white">
+                            @forelse($employees as $emp)
+                                @php
+                                    $lastAtt = $emp->attendances->first();
+                                    $nextAbsence = $emp->absences->first();
+                                    
+                                    $isOnline = false;
+                                    $statusLabel = 'ASSENTE / FUORI';
+                                    $statusColor = 'bg-gray-100 text-gray-600 border border-gray-200';
+
+                                    // Check Timbratura
+                                    if ($lastAtt && $lastAtt->date->isToday()) {
+                                        if ($lastAtt->clock_in && !$lastAtt->clock_out) {
+                                            $isOnline = true;
+                                            $statusLabel = 'IN SEDE';
+                                            $statusColor = 'bg-green-100 text-green-700 border border-green-200';
+                                        } elseif ($lastAtt->clock_out) {
+                                            $statusLabel = 'TURNO FINITO';
+                                            $statusColor = 'bg-blue-50 text-blue-700 border border-blue-100';
+                                        }
+                                    }
+
+                                    // Check Assenza (Sovrascrive timbratura se oggi è ferie)
+                                    if ($nextAbsence && $nextAbsence->start_date->lte(\Carbon\Carbon::today()) && $nextAbsence->end_date->gte(\Carbon\Carbon::today())) {
+                                            $statusLabel = strtoupper($nextAbsence->type);
+                                            $statusColor = 'bg-yellow-100 text-yellow-700 border border-yellow-200';
+                                            $isOnline = false;
+                                    }
+                                @endphp
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="px-6 py-3 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-8 w-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-bold text-xs">
+                                                {{ substr($emp->name, 0, 2) }}
+                                            </div>
+                                            <div class="ml-3">
+                                                <div class="text-sm font-bold text-gray-900">{{ $emp->name }}</div>
+                                                <div class="text-xs text-gray-400">{{ $emp->registration_number }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-3 whitespace-nowrap text-center">
+                                        <span class="px-2 py-1 inline-flex text-xs leading-4 font-bold rounded-full {{ $statusColor }}">
+                                            @if($isOnline) <span class="w-2 h-2 bg-green-500 rounded-full mr-2 self-center animate-pulse"></span> @endif
+                                            {{ $statusLabel }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-500">
+                                        @if($lastAtt)
+                                            @if($lastAtt->date->isToday())
+                                                <span class="font-bold text-gray-800">Oggi</span>,
+                                                @if($lastAtt->clock_out)
+                                                    Uscita alle {{ $lastAtt->clock_out->format('H:i') }}
+                                                @else
+                                                    Ingresso alle {{ $lastAtt->clock_in->format('H:i') }}
+                                                @endif
+                                            @else
+                                                {{ $lastAtt->date->format('d/m') }} - {{ $lastAtt->clock_out ? 'Turno completo' : 'Incompleto' }}
+                                            @endif
+                                        @else
+                                            <span class="text-gray-400 italic text-xs">Mai timbrato</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-3 whitespace-nowrap text-right text-sm">
+                                        @if($nextAbsence && $nextAbsence->start_date->gt(\Carbon\Carbon::today()))
+                                            <div class="text-gray-700 font-bold text-xs">{{ ucfirst($nextAbsence->type) }}</div>
+                                            <div class="text-xs text-gray-500">Dal {{ $nextAbsence->start_date->format('d/m') }}</div>
+                                        @else
+                                            <span class="text-gray-300 text-xs">-</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="px-6 py-4 text-center text-gray-400 text-sm">
+                                        Nessun dipendente registrato.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <div class="lg:col-span-2 bg-white overflow-hidden shadow-sm rounded-xl">
+                    <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+                        <h3 class="font-bold text-gray-800 text-lg">Ultimi Rapporti d'Intervento</h3>
+                        <a href="{{ route('work-reports.index') }}" class="text-sm text-indigo-600 hover:underline">Vedi tutti</a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-left text-sm whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-100">
+                                    <th class="px-6 py-3 font-semibold text-gray-600">Data</th>
+                                    <th class="px-6 py-3 font-semibold text-gray-600">Cliente</th>
+                                    <th class="px-6 py-3 font-semibold text-gray-600">Stato</th>
+                                    <th class="px-6 py-3 text-right font-semibold text-gray-600">Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($recentReports as $report)
+                                    <tr class="border-b border-gray-50 hover:bg-gray-50">
+                                        <td class="px-6 py-3">{{ \Carbon\Carbon::parse($report->date)->format('d/m/Y') }}</td>
+                                        <td class="px-6 py-3 font-medium">{{ $report->client->name }}</td>
+                                        <td class="px-6 py-3">
+                                            @if($report->status == 'closed')
+                                                <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Chiuso</span>
+                                            @else
+                                                <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold">Bozza</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-3 text-right">
+                                            <a href="{{ route('work-reports.edit', $report) }}" class="text-gray-400 hover:text-indigo-600">
+                                                <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="4" class="px-6 py-4 text-center text-gray-400">Nessun rapporto recente.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white overflow-hidden shadow-sm rounded-xl">
+                    <div class="p-5 border-b border-gray-100 border-l-4 border-l-red-500">
+                        <h3 class="font-bold text-gray-800 text-lg">Scadenziario Fatture</h3>
+                        <p class="text-xs text-gray-500 mt-1">Pagamenti in attesa o scaduti</p>
+                    </div>
+                    <div class="p-4 space-y-4">
+                        @forelse($unpaidInvoices as $invoice)
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border {{ $invoice->status == 'overdue' ? 'border-red-200 bg-red-50' : 'border-gray-200' }}">
+                                <div>
+                                    <div class="font-bold text-gray-800">Fatt. #{{ $invoice->number }}</div>
+                                    <div class="text-xs text-gray-500">{{ $invoice->client->name }}</div>
+                                    <div class="text-xs font-medium {{ $invoice->status == 'overdue' ? 'text-red-600' : 'text-orange-600' }}">
+                                        Scad. {{ \Carbon\Carbon::parse($invoice->due_date)->format('d/m/Y') }}
+                                    </div>
                                 </div>
-                            @endforeach
+                                <div class="text-right">
+                                    <div class="font-bold text-gray-900">€ {{ number_format($invoice->total_gross, 2, ',', '.') }}</div>
+                                    <a href="{{ route('invoices.edit', $invoice) }}" class="text-xs text-indigo-600 hover:underline">Vedi</a>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="text-center py-6 text-gray-400">
+                                <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <p>Ottimo! Nessuna fattura in sospeso.</p>
+                            </div>
+                        @endforelse
+                    </div>
+                    @if($unpaidInvoices->isNotEmpty())
+                        <div class="bg-gray-50 px-4 py-3 text-center border-t border-gray-100">
+                            <a href="{{ route('invoices.index', ['status' => 'unpaid']) }}" class="text-xs font-bold text-red-600 hover:text-red-800 uppercase tracking-wide">Vedi tutti i sospesi</a>
                         </div>
                     @endif
-
-                    <form id="clockFormIn" action="{{ route('webapp.clock') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="coords" class="coordsInput">
-                        <button type="button" @click="timbra('clockFormIn')" :disabled="loading"
-                                class="w-64 h-64 bg-green-500 rounded-full flex flex-col items-center justify-center shadow-xl shadow-green-500/30 transition transform active:scale-95 relative overflow-hidden">
-                             <div x-show="loading" class="absolute inset-0 bg-black/20 flex items-center justify-center z-10"><svg class="animate-spin h-10 w-10 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>
-                             <span class="text-white font-bold text-3xl drop-shadow-md">INGRESSO</span>
-                             <span class="text-white/80 text-sm mt-1">Nuovo Turno</span>
-                        </button>
-                    </form>
                 </div>
 
-            @elseif($status === 'exit')
-                
-                <div class="flex-grow space-y-4 p-4 pb-32"> 
-                    <div class="text-center py-2">
-                        <span class="bg-gray-200 text-gray-500 text-[10px] px-2 py-1 rounded-full uppercase tracking-wider">Stream Attività</span>
-                    </div>
-
-                    @forelse($notices as $notice)
-                        <div class="w-full bg-white rounded-xl p-4 shadow-sm border border-gray-100 {{ $notice->is_urgent ? 'border-l-4 border-l-red-500' : '' }}">
-                            
-                            @if($notice->message)
-                                <p class="text-sm text-gray-800 leading-relaxed font-medium mb-3">{{ $notice->message }}</p>
-                            @endif
-                            
-                            <div class="grid grid-cols-2 gap-2 {{ $notice->message ? 'border-t border-gray-100 pt-3' : '' }}">
-                                
-                                @if($notice->target_location)
-                                    <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($notice->target_location) }}" target="_blank" class="flex items-center justify-center gap-2 bg-blue-50 border border-blue-100 rounded-lg py-2.5 active:bg-blue-100 transition">
-                                        <span class="text-lg">📍</span>
-                                        <span class="text-xs font-bold text-blue-700">Naviga</span>
-                                    </a>
-                                @endif
-
-                                @if($notice->target_email)
-                                    <a href="mailto:{{ $notice->target_email }}" class="flex items-center justify-center gap-2 bg-orange-50 border border-orange-100 rounded-lg py-2.5 active:bg-orange-100 transition">
-                                        <span class="text-lg">📧</span>
-                                        <span class="text-xs font-bold text-orange-700">Email</span>
-                                    </a>
-                                @endif
-
-                                @if($notice->target_phone)
-                                    <a href="tel:{{ $notice->target_phone }}" class="flex items-center justify-center gap-2 bg-green-50 border border-green-100 rounded-lg py-2.5 active:bg-green-100 transition">
-                                        <span class="text-lg">📞</span>
-                                        <span class="text-xs font-bold text-green-700">Chiama</span>
-                                    </a>
-                                @endif
-                            </div>
-                            
-                            <p class="text-[10px] text-gray-400 mt-2 text-right">Ricevuto alle {{ $notice->created_at->format('H:i') }}</p>
-                        </div>
-                    @empty
-                        <div class="text-center py-10 opacity-50">
-                            <p class="text-sm">Nessuna attività recente.</p>
-                        </div>
-                    @endforelse
-                </div>
-
-                <div class="fixed bottom-20 left-0 w-full px-4 pb-4 pt-6 bg-gradient-to-t from-gray-100 via-gray-100 to-transparent z-40">
-                    <form id="clockFormOut" action="{{ route('webapp.clock') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="coords" class="coordsInput">
-                        <button type="button" @click="timbra('clockFormOut')" :disabled="loading"
-                                class="w-full bg-red-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-red-500/20 flex items-center justify-between px-6 active:scale-95 transition transform">
-                            <span class="text-sm opacity-80 font-medium">Turno in corso</span>
-                            <div class="flex items-center gap-2">
-                                <span x-show="!loading" class="tracking-wide">TIMBRA USCITA</span>
-                                <span x-show="loading">Attendi...</span>
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                            </div>
-                        </button>
-                    </form>
-                </div>
-            @endif
-        </div>
-
-        <div x-show="tab === 'reports'" class="p-4 space-y-4">
-            <h2 class="font-bold text-gray-800 text-lg mb-4">Rapporti da far firmare</h2>
-            @forelse($pendingReports as $report)
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <span class="text-xs font-bold bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">BOZZA</span>
-                            <h3 class="font-bold text-gray-900 mt-1">{{ $report->client->name }}</h3>
-                            <p class="text-xs text-gray-500">#{{ $report->number }} - {{ \Carbon\Carbon::parse($report->date)->format('d/m/Y') }}</p>
-                        </div>
-                    </div>
-                    <div class="mt-3 pt-3 border-t border-gray-50 flex justify-between items-center">
-                        <span class="text-xs font-mono bg-gray-100 px-2 py-1 rounded select-all">{{ $report->unique_code }}</span>
-                        <a href="{{ route('guest.report.show', $report->unique_code) }}" target="_blank" class="bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-lg shadow hover:bg-indigo-700">Apri per Firma →</a>
-                    </div>
-                </div>
-            @empty
-                <div class="text-center py-10 text-gray-400"><p>Nessun rapporto in attesa.</p></div>
-            @endforelse
-        </div>
-
-        <div x-show="tab === 'leave'" class="p-4 space-y-4">
-            <h2 class="font-bold text-gray-800 text-lg mb-4">Richiedi Ferie</h2>
-            <div class="bg-white p-6 rounded-xl shadow-sm">
-                <form action="{{ route('webapp.leave') }}" method="POST" class="space-y-4">
-                    @csrf
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Inizio Ferie</label>
-                        <input type="date" name="start_date" class="w-full rounded-lg border-gray-300" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Giorni totali</label>
-                        <input type="number" name="days" value="1" min="1" class="w-full rounded-lg border-gray-300" required>
-                    </div>
-                    <button type="submit" class="w-full bg-orange-500 text-white font-bold py-3 rounded-xl shadow-md">Invia Richiesta</button>
-                </form>
             </div>
         </div>
     </div>
-
-    <div class="bg-white border-t border-gray-200 h-20 shrink-0 flex justify-between items-center px-8 z-50 relative pb-safe">
-        <button @click="tab = 'home'" :class="tab === 'home' ? 'text-indigo-600' : 'text-gray-400'" class="flex flex-col items-center w-1/3">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-            <span class="text-[10px] font-bold mt-1">Home</span>
-        </button>
-        <button @click="tab = 'reports'" :class="tab === 'reports' ? 'text-indigo-600' : 'text-gray-400'" class="flex flex-col items-center w-1/3">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            <span class="text-[10px] font-bold mt-1">Rapporti</span>
-        </button>
-        <button @click="tab = 'leave'" :class="tab === 'leave' ? 'text-indigo-600' : 'text-gray-400'" class="flex flex-col items-center w-1/3">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            <span class="text-[10px] font-bold mt-1">Ferie</span>
-        </button>
-    </div>
-
-    <script>
-        function appLogic() {
-            return {
-                tab: 'home',
-                loading: false,
-                timbra(formId) {
-                    this.loading = true;
-                    if ("geolocation" in navigator) {
-                        navigator.geolocation.getCurrentPosition(
-                            (position) => {
-                                let coords = `${position.coords.latitude},${position.coords.longitude}`;
-                                document.querySelector('#' + formId + ' .coordsInput').value = coords;
-                                document.getElementById(formId).submit();
-                            }, 
-                            (error) => {
-                                this.loading = false;
-                                alert("Errore GPS: " + error.message);
-                            },
-                            { enableHighAccuracy: true, timeout: 10000 }
-                        );
-                    } else {
-                        alert("GPS non supportato.");
-                        this.loading = false;
-                    }
-                }
-            }
-        }
-    </script>
-</body>
-</html>
+</x-app-layout>
